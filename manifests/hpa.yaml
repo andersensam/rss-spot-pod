@@ -1,0 +1,36 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: genai-spot-pod-autoscaler
+  namespace: genai-spot-pod
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: genai-spot-pod-test
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 60
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 10
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 15
+      - type: Pods
+        value: 4
+        periodSeconds: 15
+      selectPolicy: Max
+    scaleDown:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 15
